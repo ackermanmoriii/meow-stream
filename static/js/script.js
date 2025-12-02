@@ -1,3 +1,153 @@
+// In script.js, add this function at the beginning:
+function getThumbnailUrl(thumbnail, videoId, size = 'hqdefault') {
+    if (thumbnail && thumbnail.startsWith('http')) {
+        return thumbnail;
+    }
+    
+    if (videoId) {
+        return `https://i.ytimg.com/vi/${videoId}/${size}.jpg`;
+    }
+    
+    // Return a data URI for a gray placeholder
+    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjE2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjFmMmY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2E0YjBiZSI+Tm8gVGh1bWJuYWlsPC90ZXh0Pjwvc3ZnPg==';
+}
+
+// Then update the displaySearchResults function:
+function displaySearchResults(results) {
+    if (!results || results.length === 0) {
+        elements.resultsContainer.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <p>No results found</p>
+                <p class="small">Try a different search term</p>
+            </div>
+        `;
+        elements.searchResults.classList.add('hidden');
+        return;
+    }
+    
+    elements.resultsContainer.innerHTML = '';
+    elements.resultsCount.textContent = `${results.length} results`;
+    
+    results.forEach((result, index) => {
+        const duration = formatDuration(result.duration);
+        const thumbnailUrl = getThumbnailUrl(result.thumbnail, result.id);
+        
+        const resultElement = document.createElement('div');
+        resultElement.className = 'result-item';
+        resultElement.innerHTML = `
+            <div class="result-thumbnail">
+                <img src="${thumbnailUrl}" 
+                     alt="${result.title}"
+                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjE2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjFmMmY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2E0YjBiZSI+Tm8gVGh1bWJuYWlsPC90ZXh0Pjwvc3ZnPg=='">
+                <div class="result-overlay">
+                    <i class="fas fa-play-circle"></i>
+                </div>
+            </div>
+            <div class="result-info">
+                <h4 title="${result.title}">${result.title}</h4>
+                <div class="result-meta">
+                    <span><i class="fas fa-user"></i> ${result.uploader || 'Unknown'}</span>
+                    <span><i class="fas fa-clock"></i> ${duration}</span>
+                </div>
+                <div class="result-actions">
+                    <button class="btn btn-sm btn-success add-to-playlist" data-index="${index}">
+                        <i class="fas fa-plus"></i> Add
+                    </button>
+                    <button class="btn btn-sm btn-primary play-now" data-index="${index}">
+                        <i class="fas fa-play"></i> Play
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        elements.resultsContainer.appendChild(resultElement);
+    });
+    
+    // ... rest of the function remains the same ...
+}
+
+// Also update the updatePlayerTrackInfo function:
+function updatePlayerTrackInfo(track) {
+    if (!track) return;
+    
+    elements.nowPlayingTitle.textContent = track.title;
+    elements.nowPlayingArtist.textContent = track.uploader || 'Unknown';
+    
+    // Use proper thumbnail URL
+    const thumbnailUrl = getThumbnailUrl(track.thumbnail, track.id, 'hqdefault');
+    elements.nowPlayingThumbnail.src = thumbnailUrl;
+    elements.nowPlayingThumbnail.onerror = function() {
+        this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjFmMmY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2E0YjBiZSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
+    };
+    
+    elements.nowPlayingDuration.textContent = formatDuration(track.duration);
+    elements.totalDuration.textContent = formatDuration(track.duration);
+    
+    // Update queue position
+    if (AppState.playlist.tracks.length > 0) {
+        const currentIndex = AppState.playlist.tracks.findIndex(t => t.id === track.id);
+        if (currentIndex !== -1) {
+            elements.queuePosition.textContent = currentIndex + 1;
+        }
+    }
+}
+
+// Update the updatePlaylistUI function:
+function updatePlaylistUI() {
+    const tracks = AppState.playlist.tracks;
+    
+    // Update playlist count and duration
+    elements.playlistCount.textContent = `${tracks.length} track${tracks.length !== 1 ? 's' : ''}`;
+    
+    const totalDuration = tracks.reduce((sum, track) => sum + (track.duration || 0), 0);
+    elements.playlistDuration.textContent = formatDuration(totalDuration);
+    
+    // Show/hide empty state
+    elements.playlistEmpty.classList.toggle('hidden', tracks.length > 0);
+    elements.playlistTracks.classList.toggle('hidden', tracks.length === 0);
+    
+    // Update playlist tracks
+    if (tracks.length > 0) {
+        elements.playlistTracks.innerHTML = '';
+        
+        tracks.forEach((track, index) => {
+            const isCurrent = index === AppState.playlist.currentIndex;
+            const duration = formatDuration(track.duration);
+            const thumbnailUrl = getThumbnailUrl(track.thumbnail, track.id, 'default');
+            
+            const li = document.createElement('li');
+            li.className = `playlist-track ${isCurrent ? 'playing' : ''}`;
+            li.innerHTML = `
+                <img class="track-thumb" src="${thumbnailUrl}" 
+                     alt="${track.title}"
+                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YxZjJmNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2E0YjBiZSI+TzwvdGV4dD48L3N2Zz4n">
+                <div class="track-info">
+                    <h4 title="${track.title}">${track.title}</h4>
+                    <p>${track.uploader || 'Unknown'}</p>
+                </div>
+                <span class="track-duration">${duration}</span>
+                <div class="track-actions">
+                    <button class="btn-icon play-track" title="Play" data-track-id="${track.id}">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button class="btn-icon remove-track" title="Remove" data-track-id="${track.id}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            elements.playlistTracks.appendChild(li);
+        });
+    }
+    
+    // Update queue info in player
+    elements.queueTotal.textContent = tracks.length;
+    elements.queuePosition.textContent = tracks.length > 0 ? AppState.playlist.currentIndex + 1 : '-';
+}
+
+
+
 document.addEventListener('DOMContentLoaded', function() {
     // State Management
     const AppState = {
