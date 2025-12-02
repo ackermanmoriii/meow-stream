@@ -1,153 +1,3 @@
-// In script.js, add this function at the beginning:
-function getThumbnailUrl(thumbnail, videoId, size = 'hqdefault') {
-    if (thumbnail && thumbnail.startsWith('http')) {
-        return thumbnail;
-    }
-    
-    if (videoId) {
-        return `https://i.ytimg.com/vi/${videoId}/${size}.jpg`;
-    }
-    
-    // Return a data URI for a gray placeholder
-    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjE2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjFmMmY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2E0YjBiZSI+Tm8gVGh1bWJuYWlsPC90ZXh0Pjwvc3ZnPg==';
-}
-
-// Then update the displaySearchResults function:
-function displaySearchResults(results) {
-    if (!results || results.length === 0) {
-        elements.resultsContainer.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-search"></i>
-                <p>No results found</p>
-                <p class="small">Try a different search term</p>
-            </div>
-        `;
-        elements.searchResults.classList.add('hidden');
-        return;
-    }
-    
-    elements.resultsContainer.innerHTML = '';
-    elements.resultsCount.textContent = `${results.length} results`;
-    
-    results.forEach((result, index) => {
-        const duration = formatDuration(result.duration);
-        const thumbnailUrl = getThumbnailUrl(result.thumbnail, result.id);
-        
-        const resultElement = document.createElement('div');
-        resultElement.className = 'result-item';
-        resultElement.innerHTML = `
-            <div class="result-thumbnail">
-                <img src="${thumbnailUrl}" 
-                     alt="${result.title}"
-                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjE2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjFmMmY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2E0YjBiZSI+Tm8gVGh1bWJuYWlsPC90ZXh0Pjwvc3ZnPg=='">
-                <div class="result-overlay">
-                    <i class="fas fa-play-circle"></i>
-                </div>
-            </div>
-            <div class="result-info">
-                <h4 title="${result.title}">${result.title}</h4>
-                <div class="result-meta">
-                    <span><i class="fas fa-user"></i> ${result.uploader || 'Unknown'}</span>
-                    <span><i class="fas fa-clock"></i> ${duration}</span>
-                </div>
-                <div class="result-actions">
-                    <button class="btn btn-sm btn-success add-to-playlist" data-index="${index}">
-                        <i class="fas fa-plus"></i> Add
-                    </button>
-                    <button class="btn btn-sm btn-primary play-now" data-index="${index}">
-                        <i class="fas fa-play"></i> Play
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        elements.resultsContainer.appendChild(resultElement);
-    });
-    
-    // ... rest of the function remains the same ...
-}
-
-// Also update the updatePlayerTrackInfo function:
-function updatePlayerTrackInfo(track) {
-    if (!track) return;
-    
-    elements.nowPlayingTitle.textContent = track.title;
-    elements.nowPlayingArtist.textContent = track.uploader || 'Unknown';
-    
-    // Use proper thumbnail URL
-    const thumbnailUrl = getThumbnailUrl(track.thumbnail, track.id, 'hqdefault');
-    elements.nowPlayingThumbnail.src = thumbnailUrl;
-    elements.nowPlayingThumbnail.onerror = function() {
-        this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjFmMmY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2E0YjBiZSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
-    };
-    
-    elements.nowPlayingDuration.textContent = formatDuration(track.duration);
-    elements.totalDuration.textContent = formatDuration(track.duration);
-    
-    // Update queue position
-    if (AppState.playlist.tracks.length > 0) {
-        const currentIndex = AppState.playlist.tracks.findIndex(t => t.id === track.id);
-        if (currentIndex !== -1) {
-            elements.queuePosition.textContent = currentIndex + 1;
-        }
-    }
-}
-
-// Update the updatePlaylistUI function:
-function updatePlaylistUI() {
-    const tracks = AppState.playlist.tracks;
-    
-    // Update playlist count and duration
-    elements.playlistCount.textContent = `${tracks.length} track${tracks.length !== 1 ? 's' : ''}`;
-    
-    const totalDuration = tracks.reduce((sum, track) => sum + (track.duration || 0), 0);
-    elements.playlistDuration.textContent = formatDuration(totalDuration);
-    
-    // Show/hide empty state
-    elements.playlistEmpty.classList.toggle('hidden', tracks.length > 0);
-    elements.playlistTracks.classList.toggle('hidden', tracks.length === 0);
-    
-    // Update playlist tracks
-    if (tracks.length > 0) {
-        elements.playlistTracks.innerHTML = '';
-        
-        tracks.forEach((track, index) => {
-            const isCurrent = index === AppState.playlist.currentIndex;
-            const duration = formatDuration(track.duration);
-            const thumbnailUrl = getThumbnailUrl(track.thumbnail, track.id, 'default');
-            
-            const li = document.createElement('li');
-            li.className = `playlist-track ${isCurrent ? 'playing' : ''}`;
-            li.innerHTML = `
-                <img class="track-thumb" src="${thumbnailUrl}" 
-                     alt="${track.title}"
-                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YxZjJmNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2E0YjBiZSI+TzwvdGV4dD48L3N2Zz4n">
-                <div class="track-info">
-                    <h4 title="${track.title}">${track.title}</h4>
-                    <p>${track.uploader || 'Unknown'}</p>
-                </div>
-                <span class="track-duration">${duration}</span>
-                <div class="track-actions">
-                    <button class="btn-icon play-track" title="Play" data-track-id="${track.id}">
-                        <i class="fas fa-play"></i>
-                    </button>
-                    <button class="btn-icon remove-track" title="Remove" data-track-id="${track.id}">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            `;
-            
-            elements.playlistTracks.appendChild(li);
-        });
-    }
-    
-    // Update queue info in player
-    elements.queueTotal.textContent = tracks.length;
-    elements.queuePosition.textContent = tracks.length > 0 ? AppState.playlist.currentIndex + 1 : '-';
-}
-
-
-
 document.addEventListener('DOMContentLoaded', function() {
     // State Management
     const AppState = {
@@ -257,6 +107,89 @@ document.addEventListener('DOMContentLoaded', function() {
         toastContainer: document.getElementById('toast-container')
     };
 
+    // Utility Functions
+    function getThumbnailUrl(thumbnail, videoId, size = 'hqdefault') {
+        if (thumbnail && (thumbnail.startsWith('http') || thumbnail.startsWith('//'))) {
+            return thumbnail;
+        }
+        
+        if (videoId) {
+            return `https://i.ytimg.com/vi/${videoId}/${size}.jpg`;
+        }
+        
+        // Return a base64 encoded placeholder image
+        if (size === 'default') {
+            return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YxZjJmNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2E0YjBiZSI+TjwvdGV4dD48L3N2Zz4=';
+        }
+        
+        return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjE2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjFmMmY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2E0YjBiZSI+Tm8gVGh1bWJuYWlsPC90ZXh0Pjwvc3ZnPg==';
+    }
+
+    function formatDuration(seconds) {
+        if (!seconds || isNaN(seconds)) return '0:00';
+        
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function getTimeAgo(timestamp) {
+        const seconds = Math.floor((Date.now() / 1000) - timestamp);
+        
+        if (seconds < 60) return 'just now';
+        if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+        if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+        return `${Math.floor(seconds / 86400)}d ago`;
+    }
+
+    function showLoading(message = 'Loading...') {
+        elements.loadingMessage.textContent = message;
+        elements.loadingOverlay.classList.remove('hidden');
+        AppState.isLoading = true;
+    }
+
+    function hideLoading() {
+        elements.loadingOverlay.classList.add('hidden');
+        AppState.isLoading = false;
+    }
+
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        let icon = 'fa-info-circle';
+        if (type === 'success') icon = 'fa-check-circle';
+        if (type === 'error') icon = 'fa-exclamation-circle';
+        if (type === 'warning') icon = 'fa-exclamation-triangle';
+        
+        toast.innerHTML = `
+            <i class="fas ${icon}"></i>
+            <div class="toast-content">
+                <h4>${type.charAt(0).toUpperCase() + type.slice(1)}</h4>
+                <p>${message}</p>
+            </div>
+            <button class="toast-close">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        elements.toastContainer.appendChild(toast);
+        
+        // Add close button event
+        toast.querySelector('.toast-close').addEventListener('click', () => {
+            toast.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        });
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }
+        }, 5000);
+    }
+
     // Initialize Application
     function initApp() {
         // Set current year
@@ -327,23 +260,18 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Progress bar
         const progressBar = document.querySelector('.progress-bar');
-        progressBar.addEventListener('click', (e) => {
-            const rect = progressBar.getBoundingClientRect();
-            const percentage = (e.clientX - rect.left) / rect.width;
-            seekAudio(percentage);
-        });
+        if (progressBar) {
+            progressBar.addEventListener('click', (e) => {
+                const rect = progressBar.getBoundingClientRect();
+                const percentage = (e.clientX - rect.left) / rect.width;
+                seekAudio(percentage);
+            });
+        }
         
         // Other
         elements.refreshApp.addEventListener('click', () => location.reload());
         elements.exportPlaylist.addEventListener('click', exportPlaylist);
         elements.importPlaylist.addEventListener('click', importPlaylist);
-        
-        // Audio events
-        if (AppState.audioElement) {
-            AppState.audioElement.addEventListener('timeupdate', updateProgress);
-            AppState.audioElement.addEventListener('ended', onTrackEnded);
-            AppState.audioElement.addEventListener('error', onAudioError);
-        }
     }
 
     // Initialize Audio Player
@@ -420,12 +348,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         results.forEach((result, index) => {
             const duration = formatDuration(result.duration);
+            const thumbnailUrl = getThumbnailUrl(result.thumbnail, result.id);
+            
             const resultElement = document.createElement('div');
             resultElement.className = 'result-item';
             resultElement.innerHTML = `
                 <div class="result-thumbnail">
-                    <img src="${result.thumbnail || 'https://via.placeholder.com/300x160?text=No+Thumbnail'}" 
-                         alt="${result.title}">
+                    <img src="${thumbnailUrl}" 
+                         alt="${result.title}"
+                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjE2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjFmMmY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2E0YjBiZSI+Tm8gVGh1bWJuYWlsPC90ZXh0Pjwvc3ZnPg=='">
                     <div class="result-overlay">
                         <i class="fas fa-play-circle"></i>
                     </div>
@@ -479,9 +410,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function loadMoreResults() {
-        // For now, just show a message
-        // In a real app, you would fetch more results from the server
         showToast('Loading more results...', 'info');
+        // In a full implementation, you would fetch page 2, 3, etc.
     }
 
     // Playlist Functions
@@ -671,12 +601,14 @@ document.addEventListener('DOMContentLoaded', function() {
             tracks.forEach((track, index) => {
                 const isCurrent = index === AppState.playlist.currentIndex;
                 const duration = formatDuration(track.duration);
+                const thumbnailUrl = getThumbnailUrl(track.thumbnail, track.id, 'default');
                 
                 const li = document.createElement('li');
                 li.className = `playlist-track ${isCurrent ? 'playing' : ''}`;
                 li.innerHTML = `
-                    <img class="track-thumb" src="${track.thumbnail || 'https://via.placeholder.com/40?text=No+Thumb'}" 
-                         alt="${track.title}">
+                    <img class="track-thumb" src="${thumbnailUrl}" 
+                         alt="${track.title}"
+                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2YxZjJmNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2E0YjBiZSI+TjwvdGV4dD48L3N2Zz4='">
                     <div class="track-info">
                         <h4 title="${track.title}">${track.title}</h4>
                         <p>${track.uploader || 'Unknown'}</p>
@@ -834,9 +766,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     elements.playerStatus.className = 'status-playing';
                     
                     // Play audio
-                    await AppState.audioElement.play();
-                    
-                    showToast(`Now playing: "${data.title}"`, 'success');
+                    try {
+                        await AppState.audioElement.play();
+                        showToast(`Now playing: "${data.title}"`, 'success');
+                    } catch (playError) {
+                        console.error('Play error:', playError);
+                        showToast('Audio loaded. Click play to start.', 'info');
+                    }
                     
                     // Update track info with actual duration from server
                     if (data.duration) {
@@ -848,7 +784,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     clearInterval(AppState.downloadCheckInterval);
                     AppState.downloadCheckInterval = null;
                     
-                    showToast(`Download failed: ${data.error}`, 'error');
+                    // Handle specific errors
+                    let errorMessage = data.error;
+                    if (data.error && (data.error.includes('bot') || data.error.includes('Sign in') || data.error.includes('confirm'))) {
+                        errorMessage = 'YouTube blocked this request. This video may require age verification or may not be available. Try a different video.';
+                        showToast(errorMessage, 'error');
+                        
+                        // Try to play next track if available
+                        if (AppState.playlist.tracks.length > AppState.playlist.currentIndex + 1) {
+                            showToast('Trying next track...', 'info');
+                            setTimeout(() => playNext(), 2000);
+                        }
+                    } else {
+                        showToast(`Download failed: ${errorMessage}`, 'error');
+                    }
+                    
                     elements.playerStatus.textContent = 'Error';
                     elements.playerStatus.className = 'status-idle';
                 }
@@ -857,6 +807,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error checking download progress:', error);
                 clearInterval(AppState.downloadCheckInterval);
                 AppState.downloadCheckInterval = null;
+                
+                showToast('Connection error. Please try again.', 'error');
             }
         }, 1000);
     }
@@ -906,7 +858,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const percentage = (currentTime / duration) * 100;
         
         elements.progressFill.style.width = `${percentage}%`;
-        elements.progressHandle.style.left = `${percentage}%`;
+        if (elements.progressHandle) {
+            elements.progressHandle.style.left = `${percentage}%`;
+        }
         
         elements.progressText.textContent = formatDuration(currentTime);
         
@@ -959,7 +913,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Display video info
             elements.videoTitle.textContent = data.title;
-            elements.videoThumbnail.src = data.thumbnail || 'https://via.placeholder.com/300x120?text=No+Thumbnail';
+            elements.videoThumbnail.src = getThumbnailUrl(data.thumbnail, data.id, 'hqdefault');
             elements.videoUploader.textContent = data.uploader;
             elements.videoDuration.textContent = formatDuration(data.duration);
             elements.videoDescription.textContent = data.description || 'No description available';
@@ -1023,7 +977,14 @@ document.addEventListener('DOMContentLoaded', function() {
         
         elements.nowPlayingTitle.textContent = track.title;
         elements.nowPlayingArtist.textContent = track.uploader || 'Unknown';
-        elements.nowPlayingThumbnail.src = track.thumbnail || 'https://via.placeholder.com/100?text=No+Thumb';
+        
+        // Use proper thumbnail URL
+        const thumbnailUrl = getThumbnailUrl(track.thumbnail, track.id, 'hqdefault');
+        elements.nowPlayingThumbnail.src = thumbnailUrl;
+        elements.nowPlayingThumbnail.onerror = function() {
+            this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjFmMmY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2E0YjBiZSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
+        };
+        
         elements.nowPlayingDuration.textContent = formatDuration(track.duration);
         elements.totalDuration.textContent = formatDuration(track.duration);
         
@@ -1034,24 +995,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 elements.queuePosition.textContent = currentIndex + 1;
             }
         }
-    }
-
-    // Utility Functions
-    function formatDuration(seconds) {
-        if (!seconds) return '0:00';
-        
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    }
-
-    function getTimeAgo(timestamp) {
-        const seconds = Math.floor((Date.now() / 1000) - timestamp);
-        
-        if (seconds < 60) return 'just now';
-        if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-        if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-        return `${Math.floor(seconds / 86400)}d ago`;
     }
 
     function switchSearchTab(tab) {
@@ -1170,54 +1113,6 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         
         input.click();
-    }
-
-    function showLoading(message = 'Loading...') {
-        elements.loadingMessage.textContent = message;
-        elements.loadingOverlay.classList.remove('hidden');
-        AppState.isLoading = true;
-    }
-
-    function hideLoading() {
-        elements.loadingOverlay.classList.add('hidden');
-        AppState.isLoading = false;
-    }
-
-    function showToast(message, type = 'info') {
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        
-        let icon = 'fa-info-circle';
-        if (type === 'success') icon = 'fa-check-circle';
-        if (type === 'error') icon = 'fa-exclamation-circle';
-        if (type === 'warning') icon = 'fa-exclamation-triangle';
-        
-        toast.innerHTML = `
-            <i class="fas ${icon}"></i>
-            <div class="toast-content">
-                <h4>${type.charAt(0).toUpperCase() + type.slice(1)}</h4>
-                <p>${message}</p>
-            </div>
-            <button class="toast-close">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        
-        elements.toastContainer.appendChild(toast);
-        
-        // Add close button event
-        toast.querySelector('.toast-close').addEventListener('click', () => {
-            toast.style.animation = 'slideOutRight 0.3s ease';
-            setTimeout(() => toast.remove(), 300);
-        });
-        
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.style.animation = 'slideOutRight 0.3s ease';
-                setTimeout(() => toast.remove(), 300);
-            }
-        }, 5000);
     }
 
     // Initialize the application
