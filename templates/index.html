@@ -3,122 +3,322 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Audio Streamer</title>
+    <title>YouTube Music Streamer - Search & Playlist</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1><i class="fas fa-music"></i> YouTube Audio Streamer</h1>
-            <p class="subtitle">Stream audio from YouTube videos (for educational purposes only)</p>
-        </header>
-
-        <main>
-            <div class="card">
-                <div class="input-section">
-                    <div class="input-group">
-                        <input type="text" id="youtube-url" placeholder="Paste YouTube URL here...">
-                        <button id="get-info-btn" class="btn btn-primary">
-                            <i class="fas fa-info-circle"></i> Get Info
-                        </button>
-                    </div>
-                    <p class="input-hint">Example: https://www.youtube.com/watch?v=dQw4w9WgXcQ</p>
+        <!-- Sidebar for Playlist -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3><i class="fas fa-list-music"></i> Playlist</h3>
+                <div class="sidebar-actions">
+                    <button id="clear-playlist" class="btn-icon" title="Clear Playlist">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                    <button id="toggle-sidebar" class="btn-icon" title="Hide Sidebar">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
                 </div>
-
-                <div id="video-info" class="video-info hidden">
-                    <div class="video-details">
-                        <div class="thumbnail-container">
-                            <img id="video-thumbnail" src="" alt="Video thumbnail">
-                            <div class="thumbnail-overlay">
-                                <i class="fas fa-play-circle"></i>
-                            </div>
-                        </div>
-                        <div class="video-meta">
-                            <h3 id="video-title">Video Title</h3>
-                            <div class="meta-row">
-                                <span><i class="fas fa-clock"></i> <span id="video-duration">0:00</span></span>
-                                <span><i class="fas fa-download"></i> <span id="video-size">-- MB</span></span>
-                            </div>
-                            <div class="format-selector">
-                                <label for="format-select">Audio Quality:</label>
-                                <select id="format-select">
-                                    <option value="best">Best Quality</option>
-                                    <option value="worst">Smallest Size</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="action-buttons">
-                        <button id="download-btn" class="btn btn-success">
-                            <i class="fas fa-download"></i> Download Audio
-                        </button>
-                        <button id="stream-btn" class="btn btn-primary">
-                            <i class="fas fa-play"></i> Stream Now
-                        </button>
-                    </div>
+            </div>
+            
+            <div class="playlist-info">
+                <span id="playlist-count">0 tracks</span>
+                <span id="playlist-duration">0:00</span>
+            </div>
+            
+            <div class="playlist-container">
+                <div id="playlist-empty" class="empty-state">
+                    <i class="fas fa-music"></i>
+                    <p>Your playlist is empty</p>
+                    <p class="small">Search for songs and add them here</p>
                 </div>
-
-                <div id="download-progress" class="progress-container hidden">
-                    <h3><i class="fas fa-spinner fa-spin"></i> Downloading Audio...</h3>
-                    <div class="progress-bar">
-                        <div id="progress-fill" class="progress-fill"></div>
-                    </div>
-                    <div class="progress-info">
-                        <span id="progress-text">0%</span>
-                        <span id="speed-text">--</span>
-                    </div>
-                    <div id="download-controls" class="hidden">
-                        <button id="play-btn" class="btn btn-success">
-                            <i class="fas fa-play"></i> Play Audio
-                        </button>
-                        <button id="cancel-btn" class="btn btn-danger">
-                            <i class="fas fa-times"></i> Cancel
-                        </button>
-                    </div>
-                </div>
-
-                <div id="player-section" class="player-section hidden">
-                    <h3><i class="fas fa-headphones"></i> Now Playing</h3>
-                    <div class="audio-player">
-                        <div class="player-info">
-                            <h4 id="now-playing-title">Audio Title</h4>
-                            <p id="now-playing-status">Streaming...</p>
-                        </div>
-                        <audio id="audio-player" controls>
-                            Your browser does not support the audio element.
-                        </audio>
-                        <button id="close-player" class="btn btn-sm btn-outline">
-                            <i class="fas fa-times"></i> Close Player
-                        </button>
-                    </div>
-                </div>
-
-                <div class="instructions">
-                    <h3><i class="fas fa-info-circle"></i> How to Use</h3>
-                    <ol>
-                        <li>Paste a YouTube URL in the input field above</li>
-                        <li>Click "Get Info" to retrieve video details</li>
-                        <li>Select audio quality (best or smallest size)</li>
-                        <li>Click "Download Audio" to download or "Stream Now" to play directly</li>
-                        <li>Once downloaded, click "Play Audio" to stream</li>
-                    </ol>
-                    <div class="disclaimer">
-                        <p><strong>Disclaimer:</strong> This tool is for educational purposes only. Please respect copyright laws and only stream content you have permission to use.</p>
+                <ul id="playlist-tracks" class="playlist-tracks">
+                    <!-- Playlist tracks will be added here -->
+                </ul>
+            </div>
+            
+            <div class="sidebar-footer">
+                <div class="history-section">
+                    <h4><i class="fas fa-history"></i> Recently Played</h4>
+                    <div id="recent-history" class="history-list">
+                        <!-- Recent history will be added here -->
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
 
-        <footer>
-            <p>YouTube Audio Streamer &copy; <span id="current-year">2023</span> | Built with Flask</p>
-            <p class="footer-links">
-                <a href="#" id="clear-all"><i class="fas fa-trash"></i> Clear All</a>
-                <a href="#" id="refresh-page"><i class="fas fa-sync-alt"></i> Refresh</a>
-            </p>
-        </footer>
+        <!-- Main Content -->
+        <div class="main-content">
+            <header>
+                <div class="header-top">
+                    <h1><i class="fas fa-headphones-alt"></i> YouTube Music Streamer</h1>
+                    <div class="user-info">
+                        <span id="user-session">Session: <span id="session-id">---</span></span>
+                    </div>
+                </div>
+                <p class="subtitle">Search, stream, and create playlists from YouTube music</p>
+            </header>
+
+            <main>
+                <!-- Search Section -->
+                <div class="card search-card">
+                    <div class="search-section">
+                        <div class="search-header">
+                            <h2><i class="fas fa-search"></i> Search Music</h2>
+                            <div class="search-tabs">
+                                <button class="search-tab active" data-tab="music">Music</button>
+                                <button class="search-tab" data-tab="url">URL</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Music Search Tab -->
+                        <div id="music-search-tab" class="search-tab-content active">
+                            <div class="input-group">
+                                <input type="text" id="search-query" placeholder="Search for songs, artists, albums...">
+                                <button id="search-btn" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                            </div>
+                            <div class="search-filters">
+                                <select id="search-filter">
+                                    <option value="all">All Results</option>
+                                    <option value="song">Songs Only</option>
+                                    <option value="artist">Artists</option>
+                                    <option value="album">Albums</option>
+                                </select>
+                                <select id="search-sort">
+                                    <option value="relevance">Most Relevant</option>
+                                    <option value="rating">Top Rated</option>
+                                    <option value="date">Newest</option>
+                                    <option value="view_count">Most Viewed</option>
+                                </select>
+                            </div>
+                            
+                            <div id="search-results" class="search-results hidden">
+                                <div class="results-header">
+                                    <h3>Search Results</h3>
+                                    <span id="results-count">0 results</span>
+                                </div>
+                                <div id="results-container" class="results-container">
+                                    <!-- Search results will be inserted here -->
+                                </div>
+                                <div class="results-footer">
+                                    <button id="load-more" class="btn btn-outline hidden">
+                                        <i class="fas fa-plus"></i> Load More
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- URL Input Tab -->
+                        <div id="url-search-tab" class="search-tab-content">
+                            <div class="input-group">
+                                <input type="text" id="youtube-url" placeholder="Paste YouTube URL here...">
+                                <button id="get-info-btn" class="btn btn-primary">
+                                    <i class="fas fa-info-circle"></i> Get Info
+                                </button>
+                            </div>
+                            <p class="input-hint">Example: https://www.youtube.com/watch?v=dQw4w9WgXcQ</p>
+                            
+                            <div id="video-info" class="video-info hidden">
+                                <div class="video-details">
+                                    <div class="thumbnail-container">
+                                        <img id="video-thumbnail" src="" alt="Video thumbnail">
+                                        <div class="thumbnail-overlay">
+                                            <i class="fas fa-play-circle"></i>
+                                        </div>
+                                    </div>
+                                    <div class="video-meta">
+                                        <h3 id="video-title">Video Title</h3>
+                                        <div class="meta-row">
+                                            <span><i class="fas fa-user"></i> <span id="video-uploader">Unknown</span></span>
+                                            <span><i class="fas fa-clock"></i> <span id="video-duration">0:00</span></span>
+                                        </div>
+                                        <p id="video-description" class="video-description">No description available</p>
+                                    </div>
+                                </div>
+                                <div class="action-buttons">
+                                    <button id="add-to-playlist-btn" class="btn btn-success">
+                                        <i class="fas fa-plus"></i> Add to Playlist
+                                    </button>
+                                    <button id="stream-now-btn" class="btn btn-primary">
+                                        <i class="fas fa-play"></i> Play Now
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Player Section -->
+                <div class="card player-card">
+                    <div id="player-section" class="player-section hidden">
+                        <div class="player-header">
+                            <h2><i class="fas fa-headphones"></i> Now Playing</h2>
+                            <div class="player-status">
+                                <span id="player-status" class="status-idle">Idle</span>
+                            </div>
+                        </div>
+                        
+                        <div class="current-track">
+                            <div class="track-thumbnail">
+                                <img id="now-playing-thumbnail" src="" alt="Now playing">
+                                <div class="thumbnail-overlay-small">
+                                    <i class="fas fa-music"></i>
+                                </div>
+                            </div>
+                            <div class="track-info">
+                                <h3 id="now-playing-title">No track playing</h3>
+                                <p id="now-playing-artist" class="track-artist">Unknown artist</p>
+                                <div class="track-meta">
+                                    <span id="now-playing-duration">0:00</span>
+                                    <span id="now-playing-position">0:00</span>
+                                </div>
+                            </div>
+                            <div class="track-actions">
+                                <button id="like-track" class="btn-icon" title="Like track">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="player-controls">
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div id="progress-fill" class="progress-fill"></div>
+                                    <div id="progress-handle" class="progress-handle"></div>
+                                </div>
+                                <div class="progress-info">
+                                    <span id="progress-text">0:00</span>
+                                    <span id="total-duration">0:00</span>
+                                </div>
+                            </div>
+                            
+                            <div class="control-buttons">
+                                <button id="prev-btn" class="btn-control" title="Previous">
+                                    <i class="fas fa-step-backward"></i>
+                                </button>
+                                <button id="play-btn" class="btn-control btn-control-primary" title="Play">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <button id="pause-btn" class="btn-control btn-control-primary hidden" title="Pause">
+                                    <i class="fas fa-pause"></i>
+                                </button>
+                                <button id="next-btn" class="btn-control" title="Next">
+                                    <i class="fas fa-step-forward"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="extra-controls">
+                                <button id="shuffle-btn" class="btn-icon" title="Shuffle">
+                                    <i class="fas fa-random"></i>
+                                </button>
+                                <button id="repeat-btn" class="btn-icon" title="Repeat">
+                                    <i class="fas fa-redo"></i>
+                                </button>
+                                <div class="volume-control">
+                                    <button id="mute-btn" class="btn-icon" title="Mute">
+                                        <i class="fas fa-volume-up"></i>
+                                    </button>
+                                    <input type="range" id="volume-slider" min="0" max="100" value="80">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="download-progress" class="download-progress hidden">
+                            <h4><i class="fas fa-download"></i> Downloading Audio...</h4>
+                            <div class="progress-bar-small">
+                                <div id="download-progress-fill" class="progress-fill"></div>
+                            </div>
+                            <div class="progress-info-small">
+                                <span id="download-progress-text">0%</span>
+                                <span id="download-speed-text">--</span>
+                            </div>
+                        </div>
+                        
+                        <div class="player-footer">
+                            <div class="queue-info">
+                                <span id="queue-position">-</span> of <span id="queue-total">-</span> tracks
+                            </div>
+                            <div class="player-actions">
+                                <button id="stop-btn" class="btn btn-outline">
+                                    <i class="fas fa-stop"></i> Stop
+                                </button>
+                                <button id="clear-queue-btn" class="btn btn-outline">
+                                    <i class="fas fa-trash"></i> Clear Queue
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="no-player" class="no-player">
+                        <i class="fas fa-music"></i>
+                        <h3>Nothing Playing</h3>
+                        <p>Search for music or add tracks to your playlist to start listening</p>
+                        <button id="browse-music" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Browse Music
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Instructions -->
+                <div class="card instructions-card">
+                    <div class="instructions">
+                        <h3><i class="fas fa-info-circle"></i> How to Use</h3>
+                        <div class="instructions-grid">
+                            <div class="instruction-step">
+                                <div class="step-number">1</div>
+                                <h4>Search Music</h4>
+                                <p>Use the search bar to find songs, artists, or albums</p>
+                            </div>
+                            <div class="instruction-step">
+                                <div class="step-number">2</div>
+                                <h4>Add to Playlist</h4>
+                                <p>Click the "+" button on any track to add it to your playlist</p>
+                            </div>
+                            <div class="instruction-step">
+                                <div class="step-number">3</div>
+                                <h4>Play & Enjoy</h4>
+                                <p>Click on any track in your playlist to start streaming</p>
+                            </div>
+                            <div class="instruction-step">
+                                <div class="step-number">4</div>
+                                <h4>Continuous Playback</h4>
+                                <p>Tracks will automatically play one after another</p>
+                            </div>
+                        </div>
+                        
+                        <div class="disclaimer">
+                            <p><strong>Disclaimer:</strong> This tool is for educational purposes only. Please respect copyright laws and only stream content you have permission to use.</p>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <footer>
+                <p>YouTube Music Streamer &copy; <span id="current-year">2023</span> | Built with Flask</p>
+                <p class="footer-links">
+                    <a href="#" id="refresh-app"><i class="fas fa-sync-alt"></i> Refresh</a>
+                    <a href="#" id="export-playlist"><i class="fas fa-download"></i> Export Playlist</a>
+                    <a href="#" id="import-playlist"><i class="fas fa-upload"></i> Import Playlist</a>
+                </p>
+            </footer>
+        </div>
     </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p id="loading-message">Loading...</p>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-container" class="toast-container"></div>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
