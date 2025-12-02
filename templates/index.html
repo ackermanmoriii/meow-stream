@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Audio Streamer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-music"></i> YouTube Audio Streamer</h1>
+            <p class="subtitle">Stream audio from YouTube videos (for educational purposes only)</p>
+        </header>
+
+        <main>
+            <div class="card">
+                <div class="input-section">
+                    <div class="input-group">
+                        <input type="text" id="youtube-url" placeholder="Paste YouTube URL here...">
+                        <button id="get-info-btn" class="btn btn-primary">
+                            <i class="fas fa-info-circle"></i> Get Info
+                        </button>
+                    </div>
+                    <p class="input-hint">Example: https://www.youtube.com/watch?v=dQw4w9WgXcQ</p>
+                </div>
+
+                <div id="video-info" class="video-info hidden">
+                    <div class="video-details">
+                        <div class="thumbnail-container">
+                            <img id="video-thumbnail" src="" alt="Video thumbnail">
+                            <div class="thumbnail-overlay">
+                                <i class="fas fa-play-circle"></i>
+                            </div>
+                        </div>
+                        <div class="video-meta">
+                            <h3 id="video-title">Video Title</h3>
+                            <div class="meta-row">
+                                <span><i class="fas fa-clock"></i> <span id="video-duration">0:00</span></span>
+                                <span><i class="fas fa-download"></i> <span id="video-size">-- MB</span></span>
+                            </div>
+                            <div class="format-selector">
+                                <label for="format-select">Audio Quality:</label>
+                                <select id="format-select">
+                                    <option value="best">Best Quality</option>
+                                    <option value="worst">Smallest Size</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button id="download-btn" class="btn btn-success">
+                            <i class="fas fa-download"></i> Download Audio
+                        </button>
+                        <button id="stream-btn" class="btn btn-primary">
+                            <i class="fas fa-play"></i> Stream Now
+                        </button>
+                    </div>
+                </div>
+
+                <div id="download-progress" class="progress-container hidden">
+                    <h3><i class="fas fa-spinner fa-spin"></i> Downloading Audio...</h3>
+                    <div class="progress-bar">
+                        <div id="progress-fill" class="progress-fill"></div>
+                    </div>
+                    <div class="progress-info">
+                        <span id="progress-text">0%</span>
+                        <span id="speed-text">--</span>
+                    </div>
+                    <div id="download-controls" class="hidden">
+                        <button id="play-btn" class="btn btn-success">
+                            <i class="fas fa-play"></i> Play Audio
+                        </button>
+                        <button id="cancel-btn" class="btn btn-danger">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+
+                <div id="player-section" class="player-section hidden">
+                    <h3><i class="fas fa-headphones"></i> Now Playing</h3>
+                    <div class="audio-player">
+                        <div class="player-info">
+                            <h4 id="now-playing-title">Audio Title</h4>
+                            <p id="now-playing-status">Streaming...</p>
+                        </div>
+                        <audio id="audio-player" controls>
+                            Your browser does not support the audio element.
+                        </audio>
+                        <button id="close-player" class="btn btn-sm btn-outline">
+                            <i class="fas fa-times"></i> Close Player
+                        </button>
+                    </div>
+                </div>
+
+                <div class="instructions">
+                    <h3><i class="fas fa-info-circle"></i> How to Use</h3>
+                    <ol>
+                        <li>Paste a YouTube URL in the input field above</li>
+                        <li>Click "Get Info" to retrieve video details</li>
+                        <li>Select audio quality (best or smallest size)</li>
+                        <li>Click "Download Audio" to download or "Stream Now" to play directly</li>
+                        <li>Once downloaded, click "Play Audio" to stream</li>
+                    </ol>
+                    <div class="disclaimer">
+                        <p><strong>Disclaimer:</strong> This tool is for educational purposes only. Please respect copyright laws and only stream content you have permission to use.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>YouTube Audio Streamer &copy; <span id="current-year">2023</span> | Built with Flask</p>
+            <p class="footer-links">
+                <a href="#" id="clear-all"><i class="fas fa-trash"></i> Clear All</a>
+                <a href="#" id="refresh-page"><i class="fas fa-sync-alt"></i> Refresh</a>
+            </p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
