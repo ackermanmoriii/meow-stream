@@ -1,4 +1,5 @@
 Flask==2.3.3
-yt-dlp==2023.7.6
+yt-dlp==2023.10.13  # Updated version
 Flask-CORS==4.0.0
 requests==2.31.0
+youtube-search-python==1.6.6  # Add this for better search
